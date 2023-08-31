@@ -9,6 +9,10 @@
 #include <FL/Fl_Native_File_Chooser.H> 
 #include <fstream>
 #include <string>
+#include <filesystem>
+#include <iostream>
+#include <vector>
+
 
 Fl_Text_Buffer* buffer;
 Fl_Input* subject_info;
@@ -17,9 +21,70 @@ Fl_Input* taken_time_info;
 Fl_Window* export_win;
 std::string Path = "./";
 
+namespace fs = std::filesystem;
+//-------------------------------------------------------------------------------------------------------------
+//ì•„í‹°íŒ©íŠ¸ ìˆ˜ì§‘í•˜ëŠ” í•¨ìˆ˜ë“¤-------------------------------------------------------------------------------------
+// 
+// EventLog íŒŒì¼ì„ ë³µì‚¬í•˜ëŠ” í•¨ìˆ˜
+bool CopyEventLogFiles(const std::wstring& eventLogSourceDir, const std::wstring& destDir) {
+    int Event_log_files_count = 0;
+    for (const auto& entry : fs::directory_iterator(eventLogSourceDir)) {
+        if (entry.path().extension() == L".evtx") {
+            std::wstring destPath = destDir + L"\\" + entry.path().filename().wstring();
+            if (!CopyFile(entry.path().c_str(), destPath.c_str(), FALSE)) {
+                std::cerr << "Error copying event log file: " << GetLastError() << std::endl;
+                return false;
+            }
+            Event_log_files_count++;
+        }
+    }
+    std::cout << "Total files copied: " << Event_log_files_count << std::endl; // "ë³µì‚¬ëœ íŒŒì¼ ìˆ˜ ì¶œë ¥" ì´ê±¸ ë‚˜ì¤‘ì— ì¶œë ¥ì°½ì— í•´ì¤˜ì•¼ì§€..!
+    return true;
+}
+
+// Prefetch íŒŒì¼ì„ ë³µì‚¬í•˜ëŠ” í•¨ìˆ˜
+bool CopyPrefetchFiles(const std::wstring& prefetchSourceDir, const std::wstring& destDir) {
+    for (const auto& entry : fs::directory_iterator(prefetchSourceDir)) {
+        if (entry.path().extension() == L".pf") {
+            std::wstring destPath = destDir + L"\\" + entry.path().filename().wstring();
+            if (!CopyFile(entry.path().c_str(), destPath.c_str(), FALSE)) {
+                std::cerr << "Error copying prefetch file: " << GetLastError() << std::endl;
+                return false;
+            }
+        }
+    }
+    return true;
+}
+//---------------------------------------------------------------------------------------------------------------
+//Input ë²„íŠ¼ ëˆŒë €ì„ ë•Œ ì•„í‹°íŒ©íŠ¸ ìˆ˜ì§‘í•´ì„œ ê° í´ë”ì— ì €ì¥----------------------------------------------------------
+void Copy_eventlog_Filesave() {
+    std::wstring sourceDir = L"C:\\Windows\\System32\\winevt\\Logs";
+    std::wstring baseDestDir = L"./";
+    std::wstring eventLogFolder = L"\\Event_Logs"; // ìƒˆë¡œ ìƒì„±í•  í´ë” ì´ë¦„
+    try {
+        std::filesystem::create_directory(baseDestDir + eventLogFolder);
+    }
+    catch (std::filesystem::filesystem_error& e) {
+        std::cout << "Exception caught: " << e.what() << '\n';
+        return ; // ë˜ëŠ” ì ì ˆí•œ ì˜¤ë¥˜ ì²˜ë¦¬
+    }
+    std::wstring destDir = baseDestDir + eventLogFolder; // ì´ë²¤íŠ¸ ë¡œê·¸ë¥¼ ì €ì¥í•  ë””ë ‰í† ë¦¬
+    if (CopyEventLogFiles(sourceDir, destDir)) {
+        std::cout << "Files copied successfully!" << std::endl;
+        return ;
+    }
+    else {
+        std::cout << "Failed to copy files." << std::endl;
+        return ;
+    }
+}
+
+
+//---------------------------------------------------------------------------------------------------------------
+//export ë²„íŠ¼ ê´€ë ¨ ê¸°ëŠ¥ ë“¤!! ++ save ë²„íŠ¼ ëˆŒë €ì„ ë•Œ -------------------------------------------------------------
 void save_Data(Fl_Widget* w, void* data) {
     /*
-    //ÀúÀå °æ·Î ¼³Á¤
+    //ì €ì¥ ê²½ë¡œ ì„¤ì •
     Fl_Native_File_Chooser chooser;
     chooser.title("Save As");
     chooser.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
@@ -28,7 +93,7 @@ void save_Data(Fl_Widget* w, void* data) {
         std::string baseDir(Path);
     }
     */
-    // Ãß°¡ Á¤º¸ ÀÔ·Â
+    // ì¶”ê°€ ì •ë³´ ì…ë ¥
     void** widgets = (void**)data;
     Fl_Output* date_output = (Fl_Output*)widgets[0];
     Fl_Output* investigator_output = (Fl_Output*)widgets[1];
@@ -39,7 +104,7 @@ void save_Data(Fl_Widget* w, void* data) {
     std::string time = taken_time_info->value();
     std::string artifacts = buffer->text();
 
-    // info_.txt ·Î Á¤º¸ ÀúÀå
+    // info_.txt ë¡œ ì •ë³´ ì €ì¥
     std::ofstream infoFile(Path + "info_.txt");
     infoFile << "Date: " << date << "\n";
     infoFile << "Investigator: " << investigator << "\n";
@@ -48,32 +113,33 @@ void save_Data(Fl_Widget* w, void* data) {
     infoFile << "Time Taken: " << time << "\n";
     infoFile.close();
 
-    // Ã¼Å©µÈ °¢ ¾ÆÆ¼ÆÑÆ®¸¦ °¢ ¾ÆÆ¼ÆÑÀ¸ÀÇ ÀÌ¸§À¸·Î ³»¿ë ÀúÀå
+    // ì²´í¬ëœ ê° ì•„í‹°íŒ©íŠ¸ë¥¼ ê° ì•„í‹°íŒ©íŠ¸ì˜ ì´ë¦„ìœ¼ë¡œ ë‚´ìš© ì €ì¥
     if (artifacts.find("$MFT") != std::string::npos) {
         std::ofstream mftFile(Path + "$MFT.txt");
-        mftFile << "Real $MFT...";  // ½ÇÁ¦ Á¤º¸ ³ÖÀ»ÀÚ¸®
+        mftFile << "Real $MFT...";  // ì‹¤ì œ ì •ë³´ ë„£ì„ìë¦¬
         mftFile.close();
     }
 
     if (artifacts.find("Event Log") != std::string::npos) {
         std::ofstream eventLogFile(Path+"EventLog.txt");
-        eventLogFile << "Real Event Log...";  // ½ÇÁ¦ Á¤º¸ ³ÖÀ»ÀÚ¸®
+        eventLogFile << buffer->text();
         eventLogFile.close();
     }
 
+
     if (artifacts.find("Browser History") != std::string::npos) {
         std::ofstream browserHistoryFile(Path+"BrowserHistory.txt");
-        browserHistoryFile << "Real Browser History...";  // ½ÇÁ¦ Á¤º¸ ³ÖÀ»ÀÚ¸®
+        browserHistoryFile << "Real Browser History...";  // ì‹¤ì œ ì •ë³´ ë„£ì„ìë¦¬
         browserHistoryFile.close();
     }
 
-    //ÀúÀå ´Ù µÇ¸é save Ã¢ ¾Èº¸ÀÌ°Ô
+    //ì €ì¥ ë‹¤ ë˜ë©´ save ì°½ ì•ˆë³´ì´ê²Œ
     if (export_win) {
         export_win->hide();
     }
 }
 
-// Callback for 'Export' button - ÆÄÀÏ ÀúÀå ±â´É
+// Callback for 'Export' button - íŒŒì¼ ì €ì¥ ê¸°ëŠ¥
 void export_Data(Fl_Widget * w, void* data) {
     export_win = new Fl_Window(300, 200, "Additional Information");
 
@@ -89,7 +155,9 @@ void export_Data(Fl_Widget * w, void* data) {
 
 }
 
-//Ã¼Å©¹Ú½º Å¬¸¯ ½Ã ¸¶´Ù Ãâ·Â º¯È¯
+//---------------------------------------------------------------------------------------------------------------
+//ì²´í¬ ë°•ìŠ¤ ì„ íƒ ë¶€ë¶„--------------------------------------------------------------------------------------------
+//ì²´í¬ë°•ìŠ¤ í´ë¦­ ì‹œ ë§ˆë‹¤ ì¶œë ¥ ë³€í™˜
 void updateTextDisplay(Fl_Widget* w, void* data) {
     Fl_Check_Button* button = (Fl_Check_Button*)w;
     const char* label = button->label();
@@ -97,14 +165,29 @@ void updateTextDisplay(Fl_Widget* w, void* data) {
     if (button->value()) {  // if checked
         buffer->append(label);
         buffer->append("\n");
+
+
+        if (std::string(label) == "Event Log") {
+            // Event Log ì²´í¬ë°•ìŠ¤ê°€ í´ë¦­ë˜ì—ˆë‹¤ë©´
+            std::wstring dirPath = L"./Event_Logs";  // ë””ë ‰í† ë¦¬ ê²½ë¡œ
+
+            buffer->append("\n");
+            for (const auto& entry : std::filesystem::directory_iterator(dirPath)) {
+                if (entry.path().extension() == L".evtx") {
+                    // íŒŒì¼ ì´ë¦„ì„ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
+                    std::string fileName = entry.path().filename().string();
+                    buffer->append(fileName.c_str());
+                    buffer->append("\n");
+                }
+            }
+        }
     }
     else {  // if unchecked
-     //¿ì¼±Àº ¹öÆÛÀÇ ¸ğµç µ¥ÀÌÅÍ¸¦ »èÁ¦ÇÏ°Ô µÒ...Ã¼Å©->Ã¼Å© Ç° -> Ã¼Å© ÇÏ¸é ³»¿ëÀÌ ¾ø´Â ¹®Á¦°¡ ÀÖÀ½! ÀÌ°Å´Â À½ ÃßÈÄ¿¡ ¼öÁ¤!!
-        buffer->remove(0, buffer->length());
+        buffer->text("");
     }
 }
 
-// Callback for 'Input' button ....mainÇÔ¼ö¿¡¼­ º¸¸é outputÃ¢ÀÌ ¼û°ÜÁ® ÀÖ´Ù. Input ¹öÆ°À» ´©¸£¸é InputÃ¢ÀÌ ¼û°ÜÁö°í Output Ã¢ÀÌ ³ªÅ¸³ªµµ·Ï  
+// Callback for 'Input' button ....mainí•¨ìˆ˜ì—ì„œ ë³´ë©´ outputì°½ì´ ìˆ¨ê²¨ì ¸ ìˆë‹¤. Input ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ Inputì°½ì´ ìˆ¨ê²¨ì§€ê³  Output ì°½ì´ ë‚˜íƒ€ë‚˜ë„ë¡  
 void transferInputToOutput(Fl_Widget* w, void* data) {
     Fl_Input* date_input = (Fl_Input*)(((void**)data)[0]);
     Fl_Input* investigator_input = (Fl_Input*)(((void**)data)[1]);
@@ -122,35 +205,42 @@ void transferInputToOutput(Fl_Widget* w, void* data) {
 
     date_output->redraw();
     investigator_output->redraw();
+
+    //ì•„í‹°íŒ©íŠ¸ ìˆ˜ì§‘ ë° ì €ì¥ ì‹¤í–‰.!!
+    Copy_eventlog_Filesave();
+
 }
 
+
+//---------------------------------------------------------------------------------------------------------------
+//ë©”ì¸í•¨ìˆ˜------------------------------------------------------------------------------------------------------
 int main() {
-    //ÀüÃ¼ Àå UI
+    //ì „ì²´ ì¥ UI
     Fl_Window win(700, 500, "Artifacts_Collector");
 
-    //Á¤º¸Ã¢_UI
+    //ì •ë³´ì°½_UI
     Fl_Input date_input(120, 30, 200, 30, "Date:");
     Fl_Input investigator_input(120, 90, 200, 30, "Investigator:");
 
     Fl_Output date_output(120, 30, 200, 30, "Date:");
     Fl_Output investigator_output(120, 90, 200, 30, "Investigator:");
 
-    //Ã¼Å©¹Ú½º_UI
+    //ì²´í¬ë°•ìŠ¤_UI
     Fl_Check_Button MFT_CheckBox(120, 150, 100, 30, "$MFT");
     Fl_Check_Button eventLog_CheckBox(230, 150, 100, 30, "Event Log");
     Fl_Check_Button browserHistory_CheckBox(340, 150, 150, 30, "Browser History");
 
-    //Ã¼Å©¹Ú½º ³»¿ë Ãâ·Â Ã¢
+    //ì²´í¬ë°•ìŠ¤ ë‚´ìš© ì¶œë ¥ ì°½
     Fl_Text_Display text_display(120, 200, 400, 200);
     buffer = new Fl_Text_Buffer();
     text_display.buffer(buffer);
 
-    //Ã¼Å©¹Ú½º ºÎºĞ ½ÇÇà
+    //ì²´í¬ë°•ìŠ¤ ë¶€ë¶„ ì‹¤í–‰
     MFT_CheckBox.callback(updateTextDisplay);
     eventLog_CheckBox.callback(updateTextDisplay);
     browserHistory_CheckBox.callback(updateTextDisplay);
 
-    //Á¤º¸ Ã¢ »ö±ò ¹× Ãâ·Â ¼û±è
+    //ì •ë³´ ì°½ ìƒ‰ê¹” ë° ì¶œë ¥ ìˆ¨ê¹€
     date_output.color(FL_LIGHT2);
     investigator_output.color(FL_LIGHT2);
     date_output.textcolor(FL_GRAY);
@@ -158,12 +248,12 @@ int main() {
     date_output.hide();
     investigator_output.hide();
 
-    //Input ¹öÆ° 
+    //Input ë²„íŠ¼ 
     void* widgets[] = { &date_input, &investigator_input, &date_output, &investigator_output };
     Fl_Button Input_button(350, 90, 80, 30, "Input");
     Input_button.callback(transferInputToOutput, widgets);
 
-    //export ¹öÆ°
+    //export ë²„íŠ¼
     void* exportWidgets[] = { &date_output, &investigator_output };
     Fl_Button Export_button(10, 460, 680, 30, "Export");
     Export_button.callback(export_Data, exportWidgets);
