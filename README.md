@@ -2,6 +2,8 @@
 # 윈도우 포렌식 아티팩트 수집기
 
 다운로드 : https://1drv.ms/u/s!Auf4B-HCySk0j21f55RoElPr0ItT?e=rs2LeW
+
+파일 이름 : Forensic_Artifact_Proj-6
 압축 해제 비밀번호 : KDT3rdProject
 
 사용 오픈 소스
