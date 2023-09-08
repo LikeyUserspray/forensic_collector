@@ -1,7 +1,8 @@
 # Forensics_collector
 # 윈도우 포렌식 아티팩트 수집기
 
-원본 다운로드 : https://1drv.ms/u/s!Auf4B-HCySk0j21f55RoElPr0ItT?e=rs2LeW
+다운로드 : https://1drv.ms/u/s!Auf4B-HCySk0j21f55RoElPr0ItT?e=rs2LeW
+압축 해제 비밀번호 : KDT3rdProject
 
 사용 오픈 소스
 - 반디집
