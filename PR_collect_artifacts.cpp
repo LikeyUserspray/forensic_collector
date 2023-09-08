@@ -21,7 +21,7 @@
 #include <locale>
 #include <codecvt>
 
-// ÀÌº¥Æ® µ¥ÀÌÅÍ ·Î±×¸¦ Ã³¸®ÇÏ±â À§ÇÑ Windows Event Log API 
+// ì´ë²¤íŠ¸ ë°ì´í„° ë¡œê·¸ë¥¼ ì²˜ë¦¬í•˜ê¸° ìœ„í•œ Windows Event Log API 
 #pragma comment(lib, "wevtapi.lib")
 Fl_Text_Buffer* Search_buffer;
 Fl_Text_Buffer* analysis_buffer;
@@ -52,18 +52,18 @@ bool MD5 = true;        bool SHA1 = false;          bool SHA256 = false;
 bool PC_Power;
 bool Windows_Power;
 
-// È¯°æº¯¼ö Ã³¸® ÇÔ¼ö
+// í™˜ê²½ë³€ìˆ˜ ì²˜ë¦¬ í•¨ìˆ˜
 std::wstring ExpandEnvironmentStrings(const std::wstring& path) {
     wchar_t expandedPath[MAX_PATH];
     DWORD size = ExpandEnvironmentStringsW(path.c_str(), expandedPath, MAX_PATH);
     if (size == 0 || size > MAX_PATH) {
-        // ¿À·ù Ã³¸®
+        // ì˜¤ë¥˜ ì²˜ë¦¬
         return L"";
     }
     return std::wstring(expandedPath);
 }
 
-// µğ·ºÅä¸® Å©±â È®ÀÎ
+// ë””ë ‰í† ë¦¬ í¬ê¸° í™•ì¸
 uintmax_t get_directory_size(const fs::path& path) {
     uintmax_t size = 0;
     for (auto& p : fs::recursive_directory_iterator(path)) {
@@ -74,7 +74,7 @@ uintmax_t get_directory_size(const fs::path& path) {
     return size;
 }
 
-// µğ·ºÅä¸® Å©±â º° ´ÜÀ§·Î ³ª´©¾î Ãâ·Â
+// ë””ë ‰í† ë¦¬ í¬ê¸° ë³„ ë‹¨ìœ„ë¡œ ë‚˜ëˆ„ì–´ ì¶œë ¥
 void print_human_readable_size(uintmax_t size_in_bytes) {
     double size = static_cast<double>(size_in_bytes);
 
@@ -95,7 +95,7 @@ void print_human_readable_size(uintmax_t size_in_bytes) {
     std::cout << std::fixed << std::setprecision(2) << "Total size: " << size << " " << unit << std::endl;
 }
 
-// MD5 ÇØ½Ã °è»ê ÇÔ¼ö
+// MD5 í•´ì‹œ ê³„ì‚° í•¨ìˆ˜
 std::string CalculateMD5(const std::wstring& filePath) {
     HCRYPTPROV hProv = 0;
     HCRYPTHASH hHash = 0;
@@ -145,7 +145,7 @@ std::string CalculateMD5(const std::wstring& filePath) {
     }
 }
 
-// SHA1 ÇØ½Ã °è»ê ÇÔ¼ö
+// SHA1 í•´ì‹œ ê³„ì‚° í•¨ìˆ˜
 std::string CalculateSHA1(const std::wstring& filePath) {
     HCRYPTPROV hProv = 0;
     HCRYPTHASH hHash = 0;
@@ -196,7 +196,7 @@ std::string CalculateSHA1(const std::wstring& filePath) {
     }
 }
 
-// SHA256 ÇØ½Ã °è»ê ÇÔ¼ö
+// SHA256 í•´ì‹œ ê³„ì‚° í•¨ìˆ˜
 std::string CalculateSHA256(const std::wstring& filePath) {
     HCRYPTPROV hProv = 0;
     HCRYPTHASH hHash = 0;
@@ -264,19 +264,19 @@ bool ReadUSBRegistry() {
     while (RegEnumKeyExW(hKey, dwIndex, lpName, &lpcName, NULL, NULL, NULL, &lpftLastWriteTime) == ERROR_SUCCESS) {
         std::wcout << L"USB Device: " << lpName << std::endl;
 
-        // TODO: Ãß°¡ÀûÀ¸·Î ÇÏÀ§ Å°¸¦ ¿­¾î¼­ ´õ ¸¹Àº Á¤º¸¸¦ ÃßÃâ
+        // TODO: ì¶”ê°€ì ìœ¼ë¡œ í•˜ìœ„ í‚¤ë¥¼ ì—´ì–´ì„œ ë” ë§ì€ ì •ë³´ë¥¼ ì¶”ì¶œ
 
         dwIndex++;
-        lpcName = 255;  // ¹öÆÛ Å©±â ÃÊ±âÈ­
+        lpcName = 255;  // ë²„í¼ í¬ê¸° ì´ˆê¸°í™”
     }
 
     RegCloseKey(hKey);
     return true;
 }
 
-// ÆÄÀÏ ÇØ½Ã °è»êÀ» À§ÇÑ ÇÔ¼ö
+// íŒŒì¼ í•´ì‹œ ê³„ì‚°ì„ ìœ„í•œ í•¨ìˆ˜
 bool CalculateHashesForFiles(const std::wstring& destDir, const std::wstring& extension) {
-    // ÇØ½Ã ÆÄÀÏÀ» »ı¼ºÇÏ°Å³ª ¿­±â
+    // í•´ì‹œ íŒŒì¼ì„ ìƒì„±í•˜ê±°ë‚˜ ì—´ê¸°
     std::wofstream hashFile(destDir + L"\\calculated_hash.txt");
     if (!hashFile.good()) {
         std::wcerr << L"Failed to open or create hash file." << std::endl;
@@ -318,10 +318,9 @@ bool CalculateHashesForFiles(const std::wstring& destDir, const std::wstring& ex
     return true;
 }
 
-
-// ÆÄÀÏ º¹»ç ¹× ÇØ½Ã °è»ê ÇÔ¼ö
+// íŒŒì¼ ë³µì‚¬ ë° í•´ì‹œ ê³„ì‚° í•¨ìˆ˜
 bool CopyAndHashFiles(const std::wstring& sourceDir, const std::wstring& destDir, const std::wstring& extension) {
-    // ÇØ½Ã ÆÄÀÏÀ» »ı¼ºÇÏ°Å³ª ¿­±â
+    // í•´ì‹œ íŒŒì¼ì„ ìƒì„±í•˜ê±°ë‚˜ ì—´ê¸°
     std::wofstream hashFile(destDir + L"\\calculated_hash.txt");
     if (!hashFile.good()) {
         std::wcerr << L"Failed to open or create hash file." << std::endl;
@@ -367,8 +366,8 @@ bool CopyAndHashFiles(const std::wstring& sourceDir, const std::wstring& destDir
 }
 
 //---------------------------------------------------------------------------------------------------------------
-//Analysis ±â´É Ãß°¡ ºÎºĞ ---------------------------------------------------------------------------------------
-//°Ë»öµÈ ÆÄÀÏ·Î ÀúÀå
+//Analysis ê¸°ëŠ¥ ì¶”ê°€ ë¶€ë¶„ ---------------------------------------------------------------------------------------
+//ê²€ìƒ‰ëœ íŒŒì¼ë¡œ ì €ì¥
 void SaveEventToFile(const wchar_t* content, const wchar_t* filename) {
     if (filename != NULL && content != NULL) {
         FILE* file;
@@ -386,8 +385,7 @@ void SaveEventToFile(const wchar_t* content, const wchar_t* filename) {
     }
 }
 
-
-//ÀÌº¥Æ® µ¥ÀÌÅÍ Ã³¸®(xml·Î º¯È¯) ÇÔ¼ö
+//ì´ë²¤íŠ¸ ë°ì´í„° ì²˜ë¦¬(xmlë¡œ ë³€í™˜) í•¨ìˆ˜
 void ProcessEvent(EVT_HANDLE hEvent, const wchar_t* filename)
 {
     DWORD dwBufferSize = 0;
@@ -442,17 +440,17 @@ void QueryMultiplePaths(const std::vector<std::wstring>& paths, const wchar_t* q
 
         if (NULL == hResults) {
             //wprintf(L"EvtQuery failed with %lu for path %s\n", GetLastError(), path.c_str());
-            continue; // ´ÙÀ½ °æ·Î·Î ÁøÇà
+            continue; // ë‹¤ìŒ ê²½ë¡œë¡œ ì§„í–‰
         }
 
-        // ÀÌº¥Æ® Ã³¸®
+        // ì´ë²¤íŠ¸ ì²˜ë¦¬
         DWORD dwReturned = 0;
         EVT_HANDLE hEvents[10];
         while (EvtNext(hResults, 10, hEvents, INFINITE, 0, &dwReturned))
         {
             for (DWORD i = 0; i < dwReturned; i++)
             {
-                ProcessEvent(hEvents[i], filename);  // filenameÀ» Ãß°¡·Î Àü´Ş
+                ProcessEvent(hEvents[i], filename);  // filenameì„ ì¶”ê°€ë¡œ ì „ë‹¬
                 EvtClose(hEvents[i]);
             }
         }
@@ -467,22 +465,22 @@ void QueryMultiplePaths(const std::vector<std::wstring>& paths, const wchar_t* q
 }
 
 void Search_PC_Power() {
-    //ÆÄÀÏ ÀÌ¸§ ¹× °æ·Î ¼³Á¤.
+    //íŒŒì¼ ì´ë¦„ ë° ê²½ë¡œ ì„¤ì •.
     const wchar_t* filename = L"./Artifacts/Search_PC_Power.txt";
 
-    // °æ·Î ÀÔ·Â
+    // ê²½ë¡œ ì…ë ¥
 
-    //Ã¤³Î(System, Application, Security µî... )
+    //ì±„ë„(System, Application, Security ë“±... )
     std::vector<std::wstring> logPathsChannel = {
         L"System",
         L"Application",
         L"Security"
-        // ... Ãß°¡ Ã¤³Î °æ·Î
+        // ... ì¶”ê°€ ì±„ë„ ê²½ë¡œ
     };
 
-    //·¹Áö½ºÆ®¸® ÇÏÀÌºê Áß ÀÌº¥Æ® ·Î±×? ÆÄÀÏ °æ·Î...
+    //ë ˆì§€ìŠ¤íŠ¸ë¦¬ í•˜ì´ë¸Œ ì¤‘ ì´ë²¤íŠ¸ ë¡œê·¸? íŒŒì¼ ê²½ë¡œ...
     std::vector<std::wstring> logPathsFile = {
-        // ... Ãß°¡ ÆÄÀÏ °æ·Î
+        // ... ì¶”ê°€ íŒŒì¼ ê²½ë¡œ
     };
     QueryMultiplePaths(logPathsChannel, L"*[System[(EventID=12)]]", EvtQueryChannelPath, filename);
     QueryMultiplePaths(logPathsChannel, L"*[System[(EventID=13)]]", EvtQueryChannelPath, filename);
@@ -491,22 +489,22 @@ void Search_PC_Power() {
 }
 
 void Search_Windows_Power() {
-    //ÆÄÀÏ ÀÌ¸§ ¼³Á¤.
+    //íŒŒì¼ ì´ë¦„ ì„¤ì •.
     const wchar_t* filename = L"./Artifacts/Search_Windows_Power.txt";
 
-    // °æ·Î ÀÔ·Â
+    // ê²½ë¡œ ì…ë ¥
 
-    //Ã¤³Î(System, Application, Security µî... )
+    //ì±„ë„(System, Application, Security ë“±... )
     std::vector<std::wstring> logPathsChannel = {
         L"System",
         L"Application",
         L"Security"
-        // ... Ãß°¡ Ã¤³Î °æ·Î
+        // ... ì¶”ê°€ ì±„ë„ ê²½ë¡œ
     };
 
-    //·¹Áö½ºÆ®¸® ÇÏÀÌºê Áß ÀÌº¥Æ® ·Î±×? ÆÄÀÏ °æ·Î...
+    //ë ˆì§€ìŠ¤íŠ¸ë¦¬ í•˜ì´ë¸Œ ì¤‘ ì´ë²¤íŠ¸ ë¡œê·¸? íŒŒì¼ ê²½ë¡œ...
     std::vector<std::wstring> logPathsFile = {
-        // ... Ãß°¡ ÆÄÀÏ °æ·Î
+        // ... ì¶”ê°€ íŒŒì¼ ê²½ë¡œ
     };
     QueryMultiplePaths(logPathsChannel, L"*[System[(EventID=100)]]", EvtQueryChannelPath, filename);
     QueryMultiplePaths(logPathsChannel, L"*[System[(EventID=200)]]", EvtQueryChannelPath, filename);
@@ -514,7 +512,7 @@ void Search_Windows_Power() {
     QueryMultiplePaths(logPathsFile, L"*[System[(EventID=200)]]", EvtQueryFilePath, filename);
 }
 
-// ÆÄÀÏÀÇ MAC time Á¤º¸¸¦ ÃßÃâÇÏ´Â ÇÔ¼ö
+// íŒŒì¼ì˜ MAC time ì •ë³´ë¥¼ ì¶”ì¶œí•˜ëŠ” í•¨ìˆ˜
 void GetFileTimeInfo(const std::wstring& filePath, std::ofstream& outFile) {
     HANDLE hFile = CreateFileW(
         filePath.c_str(),
@@ -571,8 +569,7 @@ void GetFileTimeInfo(const std::wstring& filePath, std::ofstream& outFile) {
     CloseHandle(hFile);
 }
 
-
-// µğ·ºÅÍ¸® ³»ÀÇ ¸ğµç ÆÄÀÏÀ» ´ë»óÀ¸·Î GetFileTimeInfo ÇÔ¼ö¸¦ È£Ãâ
+// ë””ë ‰í„°ë¦¬ ë‚´ì˜ ëª¨ë“  íŒŒì¼ì„ ëŒ€ìƒìœ¼ë¡œ GetFileTimeInfo í•¨ìˆ˜ë¥¼ í˜¸ì¶œ
 void ProcessDirectory(const std::wstring& dirPath, std::ofstream& outFile) {
     WIN32_FIND_DATAW findFileData;
     HANDLE hFind = FindFirstFileW((dirPath + L"\\*").c_str(), &findFileData);
@@ -599,7 +596,7 @@ void ProcessDirectory(const std::wstring& dirPath, std::ofstream& outFile) {
 }
 
 //---------------------------------------------------------------------------------------------------------------
-//export ¹öÆ° °ü·Ã ±â´É µé!! ++ save ¹öÆ° ´­·¶À» ¶§ -------------------------------------------------------------
+//export ë²„íŠ¼ ê´€ë ¨ ê¸°ëŠ¥ ë“¤!! ++ save ë²„íŠ¼ ëˆŒë €ì„ ë•Œ -------------------------------------------------------------
 void save_Data(Fl_Widget* w, void* data) {
     void** widgets = (void**)data;
     Fl_Output* date_output = (Fl_Output*)widgets[0];
@@ -610,16 +607,19 @@ void save_Data(Fl_Widget* w, void* data) {
     std::string subject = subject_info->value();
     std::string selected = selected_info->value();
 
-    // info_.txt ·Î Á¤º¸ ÀúÀå
+    // info_.txt ë¡œ ì •ë³´ ì €ì¥
     std::ofstream infoFile(Path + "info_.txt");
     infoFile << "Date: " << date << "\n";
     infoFile << "Investigator: " << investigator << "\n";
     infoFile << "Subject: " << subject << "\n";
     infoFile << "Selected Targets: " << selected << "\n";
     infoFile.close();
-    SetFileAttributes(L"./Artifacts/info_.txt", FILE_ATTRIBUTE_READONLY);
 
-    // Ã¼Å©µÈ °¢ ¾ÆÆ¼ÆÑÆ®¸¦ °¢ ¾ÆÆ¼ÆÑÆ®ÀÇ ÀÌ¸§À¸·Î ³»¿ë ÀúÀå
+    if (!SetFileAttributes(L"./Artifacts/info_.txt", FILE_ATTRIBUTE_READONLY)) {
+        DWORD dwError = GetLastError();
+    }
+
+    // ì²´í¬ëœ ê° ì•„í‹°íŒ©íŠ¸ë¥¼ ê° ì•„í‹°íŒ©íŠ¸ì˜ ì´ë¦„ìœ¼ë¡œ ë‚´ìš© ì €ì¥
     if (Ntfs) {
         std::system("Achoir\\Achoir.exe /ini:Achoir\\NTFS_Artifact.ACQ");
         CalculateHashesForFiles(L".\\Artifacts\\NTFS_Artifact", L".*");
@@ -663,7 +663,7 @@ void save_Data(Fl_Widget* w, void* data) {
     if (BrowserHist) {
         std::system("Achoir\\Achoir.exe /ini:Achoir\\BrowserHistory.ACQ");
 
-        std::wstring ChromeHistSrcDir = L"%localappdata%\\Google\\Chrome\\User Data\\Cache";
+        std::wstring ChromeHistSrcDir = L"%localappdata%\\Google\\Chrome\\User Data";
         ChromeHistSrcDir = ExpandEnvironmentStrings(ChromeHistSrcDir);
         std::wstring ChromeHistDstDir = L".\\Artifacts\\Brw\\Chrome";
 
@@ -692,7 +692,7 @@ void save_Data(Fl_Widget* w, void* data) {
     }
 
     if (RDPCache) {
-        std::wstring RDPSourceDir = L"%LOCALAPPDATA%\\Microsoft\\Terminal Sever Client\\Cache";
+        std::wstring RDPSourceDir = L"%LOCALAPPDATA%\\Microsoft\\Terminal Server Client\\Cache";
         RDPSourceDir = ExpandEnvironmentStrings(RDPSourceDir);
         std::system("mkdir \"Artifacts\\RDP Cache\"");
         std::wstring RDPDestDir = L".\\Artifacts\\RDP Cache";
@@ -757,46 +757,46 @@ void save_Data(Fl_Widget* w, void* data) {
     ProcessDirectory(L".\\Artifacts\\RBin", outFile);
     outFile2.close();
 
-    //----- ZIP | 7z ¾ĞÃà ±â´É : 1. °æ·Î ÀúÀå ±â´É -----//
+    //----- ZIP | 7z ì••ì¶• ê¸°ëŠ¥ : 1. ê²½ë¡œ ì €ì¥ ê¸°ëŠ¥ -----//
     std::wstring WorkingDir = L".\\Artifacts";
 
-    // Å×½ºÆ® ±â´É : currentDir °ªÀ» Ãâ·Â
+    // í…ŒìŠ¤íŠ¸ ê¸°ëŠ¥ : currentDir ê°’ì„ ì¶œë ¥
     std::wcout << L"[+] Current Directory: " << WorkingDir << std::endl;
 
-    // Artifacts Æú´õ¿¡ ÀÖ´Â ¸ğµç ÆÄÀÏÀ» ±× »óÀ§ Æú´õ¿¡ Artifacts.zip ÆÄÀÏ·Î ¾ĞÃàÇÏ´Â ±â´É
-    // Ex) bandizip.exe c zipÆÄÀÏ°æ·Î/zipÆÄÀÏÀÌ¸§.zip ¾ĞÃàÇÒ_°æ·Î/ ¾ĞÃàÇÒ_Ãß°¡°æ·Î/
-    // C : (»õ·Î ¾ĞÃà ÆÄÀÏÀ» »ı¼º) date : (¾ĞÃà ÆÄÀÏÀÇ °æ·Î¸í¿¡ ÇöÀç ½Ã½ºÅÛ ½Ã°£À» »ğÀÔ)
-    // Áö¿ø °¡´ÉÇÑ ¾ĞÃà È®ÀåÀÚ : zip, zipx, exe, tar, tgz, lzh, iso, 7z, gz, xz
+    // Artifacts í´ë”ì— ìˆëŠ” ëª¨ë“  íŒŒì¼ì„ ê·¸ ìƒìœ„ í´ë”ì— Artifacts.zip íŒŒì¼ë¡œ ì••ì¶•í•˜ëŠ” ê¸°ëŠ¥
+    // Ex) bandizip.exe c zipíŒŒì¼ê²½ë¡œ/zipíŒŒì¼ì´ë¦„.zip ì••ì¶•í• _ê²½ë¡œ/ ì••ì¶•í• _ì¶”ê°€ê²½ë¡œ/
+    // C : (ìƒˆë¡œ ì••ì¶• íŒŒì¼ì„ ìƒì„±) date : (ì••ì¶• íŒŒì¼ì˜ ê²½ë¡œëª…ì— í˜„ì¬ ì‹œìŠ¤í…œ ì‹œê°„ì„ ì‚½ì…)
+    // ì§€ì› ê°€ëŠ¥í•œ ì••ì¶• í™•ì¥ì : zip, zipx, exe, tar, tgz, lzh, iso, 7z, gz, xz
 
     try {
-        // 2. °æ·Î ¼³Á¤
+        // 2. ê²½ë¡œ ì„¤ì •
         fs::path path_to_check = WorkingDir;
 
-        // 3. °æ·ÎÀÇ µğ½ºÅ© »ç¿ë·® °è»ê
+        // 3. ê²½ë¡œì˜ ë””ìŠ¤í¬ ì‚¬ìš©ëŸ‰ ê³„ì‚°
         uintmax_t size_in_bytes = get_directory_size(path_to_check);
 
-        // ¿ë·®À» ÀĞ±â ½¬¿î ÇüÅÂ·Î Ãâ·Â
+        // ìš©ëŸ‰ì„ ì½ê¸° ì‰¬ìš´ í˜•íƒœë¡œ ì¶œë ¥
         print_human_readable_size(size_in_bytes);
 
-        // 4. ¿ë·®ÀÌ 1GB ¹Ì¸¸ÀÎÁö È®ÀÎ
+        // 4. ìš©ëŸ‰ì´ 1GB ë¯¸ë§Œì¸ì§€ í™•ì¸
         if (static_cast<double>(size_in_bytes) < 1024.0 * 1024.0 * 1024.0) {
-            // 4-1. B Ä¿¸Çµå ÀÛ¼º
+            // 4-1. B ì»¤ë§¨ë“œ ì‘ì„±
             std::string command_1 = "Bandizip\\Bandizip.exe c -date Artifacts_%Y-%m-%d_%H-%M-%S.zip Artifacts";
-            // Å×½ºÆ® ±â´É : Commnad_1 Line °ª Ãâ·Â
+            // í…ŒìŠ¤íŠ¸ ê¸°ëŠ¥ : Commnad_1 Line ê°’ ì¶œë ¥
             std::cout << "[+] Command Line: " << command_1 << std::endl;
-            // 4-2. ½ÇÇà
+            // 4-2. ì‹¤í–‰
             int result = system(command_1.c_str());
         }
         else {
-            // 5. C Ä¿¸Çµå ÀÛ¼º
+            // 5. C ì»¤ë§¨ë“œ ì‘ì„±
             std::string command_2 = "Bandizip\\Bandizip.exe c -date Artifacts_%Y-%m-%d_%H-%M-%S.7z Artifacts";
-            // Å×½ºÆ® ±â´É : Commnad_2 Line °ª Ãâ·Â
+            // í…ŒìŠ¤íŠ¸ ê¸°ëŠ¥ : Commnad_2 Line ê°’ ì¶œë ¥
             std::cout << "[+] Command Line: " << command_2 << std::endl;
-            // 5-1. ½ÇÇà
+            // 5-1. ì‹¤í–‰
             int result = system(command_2.c_str());
         }
     }
-    // ¿¡·¯ Ãâ·Â
+    // ì—ëŸ¬ ì¶œë ¥
     catch (const fs::filesystem_error& e) {
         std::cerr << "Filesystem error: " << e.what() << std::endl;
     }
@@ -804,16 +804,16 @@ void save_Data(Fl_Widget* w, void* data) {
         std::cerr << "An error occurred: " << e.what() << std::endl;
     }
 
-    // ACQ-IR ÀÛ¾÷ Æú´õ »èÁ¦
+    // ACQ-IR ì‘ì—… í´ë” ì‚­ì œ
     system("for /d %a in (ACQ-IR*) do rd /s /q \"%a\"");
 
-    //ÀúÀå ´Ù µÇ¸é save Ã¢ ¾Èº¸ÀÌ°Ô
+    //ì €ì¥ ë‹¤ ë˜ë©´ save ì°½ ì•ˆë³´ì´ê²Œ
     if (export_win) {
         export_win->hide();
     }
 }
 
-// Callback for 'Export' button - ÆÄÀÏ ÀúÀå ±â´É
+// Callback for 'Export' button - íŒŒì¼ ì €ì¥ ê¸°ëŠ¥
 void export_Data(Fl_Widget* w, void* data) {
     export_win = new Fl_Window(350, 180, "Additional Information");
 
@@ -829,14 +829,14 @@ void export_Data(Fl_Widget* w, void* data) {
 }
 
 //---------------------------------------------------------------------------------------------------------------
-//Ã¼Å© ¹Ú½º ¼±ÅÃ ºÎºĞ--------------------------------------------------------------------------------------------
-//Ã¼Å©¹Ú½º Å¬¸¯ ½Ã ¸¶´Ù Ãâ·Â º¯È¯
+//ì²´í¬ ë°•ìŠ¤ ì„ íƒ ë¶€ë¶„--------------------------------------------------------------------------------------------
+//ì²´í¬ë°•ìŠ¤ í´ë¦­ ì‹œ ë§ˆë‹¤ ì¶œë ¥ ë³€í™˜
 void updateTextDisplay(Fl_Widget* w, void* data) {
     Fl_Check_Button* button = (Fl_Check_Button*)w;
     const char* label = button->label();
 
     if (button->value()) {  // if checked
-        // Ã¼Å©¹Ú½º °ª È®ÀÎÀ» À§ÇÑ Ã³¸®
+        // ì²´í¬ë°•ìŠ¤ ê°’ í™•ì¸ì„ ìœ„í•œ ì²˜ë¦¬
         if (label == "System Files: NTFS Artifact, Registry, $Recycle.bin, ...")            Ntfs = true;
         else if (label == "Event Log")          Evts = true;
         else if (label == "Browser History")    BrowserHist = true;
@@ -864,7 +864,7 @@ void updateTextDisplay(Fl_Widget* w, void* data) {
     }
 }
 
-// Callback for 'Input' button ....mainÇÔ¼ö¿¡¼­ º¸¸é outputÃ¢ÀÌ ¼û°ÜÁ® ÀÖ´Ù. Input ¹öÆ°À» ´©¸£¸é InputÃ¢ÀÌ ¼û°ÜÁö°í Output Ã¢ÀÌ ³ªÅ¸³ªµµ·Ï  
+// Callback for 'Input' button ....mainí•¨ìˆ˜ì—ì„œ ë³´ë©´ outputì°½ì´ ìˆ¨ê²¨ì ¸ ìˆë‹¤. Input ë²„íŠ¼ì„ ëˆ„ë¥´ë©´ Inputì°½ì´ ìˆ¨ê²¨ì§€ê³  Output ì°½ì´ ë‚˜íƒ€ë‚˜ë„ë¡  
 void transferInputToOutput(Fl_Widget* w, void* data) {
     Fl_Input* date_input = (Fl_Input*)(((void**)data)[0]);
     Fl_Input* investigator_input = (Fl_Input*)(((void**)data)[1]);
@@ -883,21 +883,21 @@ void transferInputToOutput(Fl_Widget* w, void* data) {
     date_output->redraw();
     investigator_output->redraw();
 
-    //¾ÆÆ¼ÆÑÆ® ¼öÁı ¹× ÀúÀå ½ÇÇà.!!
+    //ì•„í‹°íŒ©íŠ¸ ìˆ˜ì§‘ ë° ì €ì¥ ì‹¤í–‰.!!
     //Copy_eventlog_Filesave();
 }
 
 void Search_PC_Power_CB(Fl_Widget* w, void* data) {
     Fl_Check_Button* checkbox = (Fl_Check_Button*)w;
     if (checkbox->value()) {
-        Search_PC_Power();  // Ã¼Å©¹Ú½º°¡ Ã¼Å©µÇ¸é ÇÔ¼ö¸¦ È£ÃâÇÕ´Ï´Ù.
+        Search_PC_Power();  // ì²´í¬ë°•ìŠ¤ê°€ ì²´í¬ë˜ë©´ í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•©ë‹ˆë‹¤.
     }
 }
 
 void Search_Windows_Power_CB(Fl_Widget* w, void* data) {
     Fl_Check_Button* checkbox = (Fl_Check_Button*)w;
     if (checkbox->value()) {
-        Search_Windows_Power();  // Ã¼Å©¹Ú½º°¡ Ã¼Å©µÇ¸é ÇÔ¼ö¸¦ È£ÃâÇÕ´Ï´Ù.
+        Search_Windows_Power();  // ì²´í¬ë°•ìŠ¤ê°€ ì²´í¬ë˜ë©´ í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•©ë‹ˆë‹¤.
     }
 }
 
@@ -917,8 +917,8 @@ void hash_choice_cb(Fl_Widget* w, void* data) {
 }
 
 //------------------------------------------------------------------------------------------
-// Search ºÎºĞ ÇÔ¼ö--------------------------------------------------------------------------
-// ÆÄÀÏ ³»¿ëÀ» °Ë»öÇÏ´Â ÇÔ¼ö
+// Search ë¶€ë¶„ í•¨ìˆ˜--------------------------------------------------------------------------
+// íŒŒì¼ ë‚´ìš©ì„ ê²€ìƒ‰í•˜ëŠ” í•¨ìˆ˜
 bool ProcessFile(const std::string& filePath, const std::string& query) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -928,19 +928,19 @@ bool ProcessFile(const std::string& filePath, const std::string& query) {
 
     bool searchResultsFound = false;
     std::string line;
-    std::string queryLower = query; // °Ë»ö¾î¸¦ ¼Ò¹®ÀÚ·Î º¯È¯
+    std::string queryLower = query; // ê²€ìƒ‰ì–´ë¥¼ ì†Œë¬¸ìë¡œ ë³€í™˜
 
-    // ¸ğµç °Ë»ö¾î¸¦ ¼Ò¹®ÀÚ·Î º¯È¯
+    // ëª¨ë“  ê²€ìƒ‰ì–´ë¥¼ ì†Œë¬¸ìë¡œ ë³€í™˜
     std::transform(queryLower.begin(), queryLower.end(), queryLower.begin(), ::tolower);
 
     while (std::getline(file, line)) {
-        std::string lineLower = line; // ÆÄÀÏ ³»¿ëÀ» ¼Ò¹®ÀÚ·Î º¯È¯
+        std::string lineLower = line; // íŒŒì¼ ë‚´ìš©ì„ ì†Œë¬¸ìë¡œ ë³€í™˜
 
-        // ÆÄÀÏ ³»¿ëÀ» ¼Ò¹®ÀÚ·Î º¯È¯ÇÏ¿© °Ë»ö
+        // íŒŒì¼ ë‚´ìš©ì„ ì†Œë¬¸ìë¡œ ë³€í™˜í•˜ì—¬ ê²€ìƒ‰
         std::transform(lineLower.begin(), lineLower.end(), lineLower.begin(), ::tolower);
 
         if (lineLower.find(queryLower) != std::string::npos) {
-            // °Ë»ö¾î°¡ Æ÷ÇÔµÈ ÁÙÀ» °á°ú¿¡ Ãß°¡
+            // ê²€ìƒ‰ì–´ê°€ í¬í•¨ëœ ì¤„ì„ ê²°ê³¼ì— ì¶”ê°€
             Search_buffer->append(("Found in file: " + filePath + "\n").c_str());
             Search_buffer->append(("Line: " + line + "\n\n").c_str());
             searchResultsFound = true;
@@ -962,11 +962,11 @@ bool ProcessDirectory(const std::string& path, const std::string& query, const s
     std::transform(queryLower.begin(), queryLower.end(), queryLower.begin(), ::tolower);
 
     for (const auto& entry : fs::directory_iterator(path)) {
-        // ÆÄÀÏÀÎ °æ¿ì Ã³¸®
+        // íŒŒì¼ì¸ ê²½ìš° ì²˜ë¦¬
         if (entry.is_regular_file()) {
             std::string filePath = entry.path().string();
 
-            // ÆÄÀÏ ÀÌ¸§À» ºñ±³ÇÏ¿© °Ë»ö
+            // íŒŒì¼ ì´ë¦„ì„ ë¹„êµí•˜ì—¬ ê²€ìƒ‰
             std::string fileName = entry.path().filename().string();
             std::string fileNameLower = fileName;
             std::transform(fileNameLower.begin(), fileNameLower.end(), fileNameLower.begin(), ::tolower);
@@ -976,30 +976,30 @@ bool ProcessDirectory(const std::string& path, const std::string& query, const s
                 searchResultsFound = true;
             }
 
-            // ÆÄÀÏ È®ÀåÀÚ¸¦ ºñ±³ÇÏ¿© °Ë»ö
+            // íŒŒì¼ í™•ì¥ìë¥¼ ë¹„êµí•˜ì—¬ ê²€ìƒ‰
             if (fileExtension.empty() || fs::path(filePath).extension() == fileExtension) {
                 searchResultsFound |= ProcessFile(filePath, query);
             }
         }
-        // µğ·ºÅä¸®ÀÎ °æ¿ì Ã³¸®
+        // ë””ë ‰í† ë¦¬ì¸ ê²½ìš° ì²˜ë¦¬
         else if (entry.is_directory()) {
             std::string dirName = entry.path().filename().string();
             std::string dirNameLower = dirName;
 
-            // "Memory Full Dump" µğ·ºÅä¸® ¿¹¿ÜÃ³¸® 
+            // "Memory Full Dump" ë””ë ‰í† ë¦¬ ì˜ˆì™¸ì²˜ë¦¬ 
             if (dirName == "MemDump") {
                 continue;
             }
 
             std::transform(dirNameLower.begin(), dirNameLower.end(), dirNameLower.begin(), ::tolower);
 
-            // °Ë»ö¾î°¡ µğ·ºÅä¸® ÀÌ¸§¿¡ Æ÷ÇÔµÇ´ÂÁö È®ÀÎ
+            // ê²€ìƒ‰ì–´ê°€ ë””ë ‰í† ë¦¬ ì´ë¦„ì— í¬í•¨ë˜ëŠ”ì§€ í™•ì¸
             if (dirNameLower.find(queryLower) != std::string::npos) {
-                Search_buffer->append(("µğ·ºÅä¸® ¹ß°ß: " + entry.path().string() + "\n").c_str());
+                Search_buffer->append(("ë””ë ‰í† ë¦¬ ë°œê²¬: " + entry.path().string() + "\n").c_str());
                 searchResultsFound = true;
             }
 
-            // µğ·ºÅä¸® ¾ÈÀÇ ÆÄÀÏ ¹× ÇÏÀ§ µğ·ºÅä¸® °Ë»ö
+            // ë””ë ‰í† ë¦¬ ì•ˆì˜ íŒŒì¼ ë° í•˜ìœ„ ë””ë ‰í† ë¦¬ ê²€ìƒ‰
             searchResultsFound |= ProcessDirectory(entry.path().string(), query, fileExtension);
         }
     }
@@ -1007,7 +1007,7 @@ bool ProcessDirectory(const std::string& path, const std::string& query, const s
     return searchResultsFound;
 }
 
-// °Ë»ö ±â´É
+// ê²€ìƒ‰ ê¸°ëŠ¥
 bool search_in_artifacts(Fl_Widget* widget, void* data) {
     // Null Check
     if (data == nullptr) {
@@ -1040,12 +1040,12 @@ bool search_in_artifacts(Fl_Widget* widget, void* data) {
     if (search_win == nullptr) {
         search_win = new Fl_Window(350, 180, "Search Results");
         search_win->callback([](Fl_Widget*, void*) {
-            // °Ë»ö °á°ú Ã¢ÀÌ ´İÈú ¶§ Search_buffer ÃÊ±âÈ­
+            // ê²€ìƒ‰ ê²°ê³¼ ì°½ì´ ë‹«í ë•Œ Search_buffer ì´ˆê¸°í™”
             if (Search_buffer != nullptr) {
                 Search_buffer->text("");
             }
             if (search_win != nullptr) {
-                search_win->hide(); // °Ë»ö °á°ú Ã¢ ¼û±â±â
+                search_win->hide(); // ê²€ìƒ‰ ê²°ê³¼ ì°½ ìˆ¨ê¸°ê¸°
             }
             });
     }
@@ -1071,7 +1071,7 @@ bool search_in_artifacts(Fl_Widget* widget, void* data) {
     return searchResultsFound;
 }
 
-// Search ¹öÆ° Äİ¹é ÇÔ¼ö
+// Search ë²„íŠ¼ ì½œë°± í•¨ìˆ˜
 void search_button_callback(Fl_Widget* widget, void* data) {
     Fl_Input* search_input = static_cast<Fl_Input*>(data);
     if (search_input == nullptr) {
@@ -1082,7 +1082,7 @@ void search_button_callback(Fl_Widget* widget, void* data) {
     bool searchResultsFound = search_in_artifacts(nullptr, search_input);
 
     if (searchResultsFound) {
-        // °Ë»ö °á°ú°¡ Search_buffer¿¡ ÀúÀåµÇ¾úÀ¸¹Ç·Î, ÀÌ ³»¿ëÀ» search_win¿¡ Ãâ·Â
+        // ê²€ìƒ‰ ê²°ê³¼ê°€ Search_bufferì— ì €ì¥ë˜ì—ˆìœ¼ë¯€ë¡œ, ì´ ë‚´ìš©ì„ search_winì— ì¶œë ¥
         search_win->begin();
         Fl_Text_Display* text_display = new Fl_Text_Display(10, 10, 330, 160);
         text_display->buffer(Search_buffer);
@@ -1090,7 +1090,7 @@ void search_button_callback(Fl_Widget* widget, void* data) {
         search_win->show();
     }
     else {
-        // °Ë»ö °á°ú°¡ ¾øÀ» ¶§ ¸Ş½ÃÁö Ç¥½Ã
+        // ê²€ìƒ‰ ê²°ê³¼ê°€ ì—†ì„ ë•Œ ë©”ì‹œì§€ í‘œì‹œ
         search_win->begin();
         Fl_Box* no_results_box = new Fl_Box(10, 10, 330, 160, "No search results found.");
         no_results_box->align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE);
@@ -1101,9 +1101,9 @@ void search_button_callback(Fl_Widget* widget, void* data) {
 
 
 //---------------------------------------------------------------------------------------------------------------
-//¸ŞÀÎÇÔ¼ö------------------------------------------------------------------------------------------------------
+//ë©”ì¸í•¨ìˆ˜------------------------------------------------------------------------------------------------------
 int main() {
-    // ÄÄÇ»ÅÍ 32ºñÆ® Ã¼Å©
+    // ì»´í“¨í„° 32ë¹„íŠ¸ ì²´í¬
     SYSTEM_INFO si;
     GetNativeSystemInfo(&si);
 
@@ -1113,17 +1113,17 @@ int main() {
     }
 
 
-    //ÀüÃ¼ Ã¢ UI
+    //ì „ì²´ ì°½ UI
     Fl_Window win(700, 450, "Artifacts_Collector");
 
-    //Á¤º¸Ã¢_UI
+    //ì •ë³´ì°½_UI
     Fl_Input date_input(120, 30, 200, 30, "Date:");
     Fl_Input investigator_input(120, 90, 200, 30, "Investigator:");
 
     Fl_Output date_output(120, 30, 200, 30, "Date:");
     Fl_Output investigator_output(120, 90, 200, 30, "Investigator:");
 
-    //Ã¼Å©¹Ú½º_UI
+    //ì²´í¬ë°•ìŠ¤_UI
     Fl_Check_Button NTFS_CheckBox(10, 150, 400, 30, "System Files: NTFS Artifact, Registry, $Recycle.bin, ...");
     Fl_Check_Button eventLog_CheckBox(10, 180, 130, 30, "Event Log");
     Fl_Check_Button browserHistory_CheckBox(130, 180, 160, 30, "Browser History");
@@ -1143,16 +1143,16 @@ int main() {
         {"SHA-256", 0, 0, 0},
         {0}
     };
-    // ÇØ½¬ ¾Ë°í¸®Áò ¼±ÅÃ ¸Ş´º
+    // í•´ì‰¬ ì•Œê³ ë¦¬ì¦˜ ì„ íƒ ë©”ë‰´
     hash_choice.menu(hash_menu);
-    hash_choice.callback(hash_choice_cb); // Äİ¹é ÇÔ¼ö ¼³Á¤
+    hash_choice.callback(hash_choice_cb); // ì½œë°± í•¨ìˆ˜ ì„¤ì •
 
     //Fl_Button Disk_Imaging_CheckBox(120, 300, 400, 30, "Disk Imaging (Warning: Target Disk will be Overwritten");
 
-    //Ã¼Å©¹Ú½º ³»¿ë Ãâ·Â Ã¢
+    //ì²´í¬ë°•ìŠ¤ ë‚´ìš© ì¶œë ¥ ì°½
     //Fl_Text_Display text_display(120, 350, 400, 200);
 
-    //Ã¼Å©¹Ú½º ºÎºĞ ½ÇÇà
+    //ì²´í¬ë°•ìŠ¤ ë¶€ë¶„ ì‹¤í–‰
     NTFS_CheckBox.callback(updateTextDisplay);
     eventLog_CheckBox.callback(updateTextDisplay);
     browserHistory_CheckBox.callback(updateTextDisplay);
@@ -1165,7 +1165,7 @@ int main() {
     Memory_CheckBox.callback(updateTextDisplay);
     System_Info_CheckBox.callback(updateTextDisplay);
 
-    //Á¤º¸ Ã¢ »ö±ò ¹× Ãâ·Â ¼û±è
+    //ì •ë³´ ì°½ ìƒ‰ê¹” ë° ì¶œë ¥ ìˆ¨ê¹€
     date_output.color(FL_LIGHT2);
     investigator_output.color(FL_LIGHT2);
     date_output.textcolor(FL_GRAY);
@@ -1173,29 +1173,29 @@ int main() {
     date_output.hide();
     investigator_output.hide();
 
-    //Input ¹öÆ° 
+    //Input ë²„íŠ¼ 
     void* widgets[] = { &date_input, &investigator_input, &date_output, &investigator_output };
     Fl_Button Input_button(350, 90, 80, 30, "Input");
     Input_button.callback(transferInputToOutput, widgets);
 
-    //export ¹öÆ°
+    //export ë²„íŠ¼
     void* exportWidgets[] = { &date_output, &investigator_output };
     Fl_Button Export_button(130, 330, 100, 30, "Export");
     Export_button.callback(export_Data, exportWidgets);
 
-    // "Details" ¶óº§ Ãß°¡
+    // "Details" ë¼ë²¨ ì¶”ê°€
     Fl_Box details_label(500, 30, 160, 30, "According to Event ID");
 
-    // "Search_PC_Power" Ã¼Å©¹Ú½º Ãß°¡
+    // "Search_PC_Power" ì²´í¬ë°•ìŠ¤ ì¶”ê°€
     Fl_Check_Button Search_PC_Power_CheckBox(500, 70, 200, 30, "Search_PC_Power");
     Search_PC_Power_CheckBox.callback(Search_PC_Power_CB);
 
-    // "Search_PC_Power" Ã¼Å©¹Ú½º Ãß°¡
+    // "Search_PC_Power" ì²´í¬ë°•ìŠ¤ ì¶”ê°€
     Fl_Check_Button Search_Windows_Power_CheckBox(500, 100, 200, 30, "Search_Windows_Power");
     Search_Windows_Power_CheckBox.callback(Search_Windows_Power_CB);
 
 
-    // Search ºÎºĞ
+    // Search ë¶€ë¶„
     Fl_Input search_input(130, 380, 200, 30, "Search:");
     Fl_Button search_button(350, 380, 80, 30, "Search");
     search_button.callback(search_button_callback, &search_input);
