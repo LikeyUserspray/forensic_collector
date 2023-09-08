@@ -1,7 +1,7 @@
 # Forensics_collector
 # 윈도우 포렌식 아티팩트 수집기
 
-다운로드 : https://1drv.ms/u/s!Auf4B-HCySk0j21f55RoElPr0ItT?e=rs2LeW
+다운로드 : [https://1drv.ms/u/s!Auf4B-HCySk0j21f55RoElPr0ItT?e=rs2LeW](https://1drv.ms/u/s!Auf4B-HCySk0j24k7Z7h0vBpKJI7?e=Zd7DyY)
 
 파일 이름 : Forensic_Artifact_Proj-6
 
