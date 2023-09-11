@@ -22,7 +22,6 @@
 - 기능 :
   
     1. 담당 수사관 및 날짜 입력 → input 버튼 누르면 해당 부분은 수정할 수 없다.
-        - 여기서는 txt로 저장하기 전까지만 수정되지 못하게 처리하였지만, txt를 read only로 저장하게 수정한 코드를 cpp로 올려두었습니다.
           
         ![vsavsda](https://github.com/LikeyUserspray/forensic_collector/assets/98539049/8309cb0b-182d-4f22-a7da-468959438adf)
        
